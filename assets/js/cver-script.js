@@ -214,6 +214,13 @@ jQuery(document).ready(function($) {
         // Trigger AJAX reload
         var sort = $('#cver-sort-dropdown').val() || 'newest';
         var productId = $('#cver-reviews-wrap').data('product-id') || $('[name="add-to-cart"]').val();
+        
+        console.log('=== FILTER AJAX Request ===');
+        console.log('Star:', star, 'Type:', typeof star);
+        console.log('Sort:', sort);
+        console.log('Product ID:', productId);
+        console.log('============================');
+        
         $('.commentlist').append('<div class="reviews-loading-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 999; display: flex; align-items: center; justify-content: center;"><div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0073aa; border-radius: 50%; animation: spin 1s linear infinite;"></div></div>');
         $.post(cver_ajax.ajax_url, {
             action: 'cver_filter_reviews',

@@ -121,6 +121,10 @@ class CVER_Core {
         $product_id = intval($a['product_id']);
         $star = $a['star'];
         $sort = $a['sort'];
+        
+        // Debug log
+        error_log('CVER get_reviews_with_pagination - Star: ' . var_export($star, true) . ', Type: ' . gettype($star));
+        
         $query = [
             'post_id' => $product_id,
             'status' => 'approve',
@@ -128,10 +132,13 @@ class CVER_Core {
             'number' => $comments_per_page,
             'offset' => ($current_page - 1) * $comments_per_page
         ];
-        // Filter by star
-        if ($star) $query['meta_query'] = [
-            ['key' => 'rating', 'value' => $star, 'compare' => '=']
-        ];
+        // Filter by star - check if star is not null and not empty string
+        if ($star !== null && $star !== '' && $star > 0) {
+            $query['meta_query'] = [
+                ['key' => 'rating', 'value' => intval($star), 'compare' => '=', 'type' => 'NUMERIC']
+            ];
+            error_log('CVER - Applied star filter: ' . intval($star));
+        }
         // Sort
         switch ($sort) {
             case 'highest': $query['orderby'] = 'meta_value_num'; $query['meta_key'] = 'rating'; $query['order'] = 'DESC'; break;
@@ -372,8 +379,12 @@ class CVER_Core {
         $product_id = intval($_POST['product_id'] ?? 0);
         $page = intval($_POST['page'] ?? 1);
         $per_page = intval($_POST['per_page'] ?? 4);
-        $star = $_POST['star'] ?? null;
+        $star = isset($_POST['star']) && $_POST['star'] !== '' ? intval($_POST['star']) : null;
         $sort = $_POST['sort'] ?? 'newest';
+        
+        // Debug log
+        error_log('CVER Filter Reviews - Star: ' . var_export($star, true) . ', Sort: ' . $sort);
+        
         $html = $this->get_reviews_with_pagination([
             'product_id'=>$product_id,'per_page'=>$per_page,'page'=>$page,'star'=>$star,'sort'=>$sort,'skip_controls'=>true
         ]);
