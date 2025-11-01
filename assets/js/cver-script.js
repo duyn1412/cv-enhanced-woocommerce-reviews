@@ -39,11 +39,19 @@ jQuery(document).ready(function($) {
                 per_page: 4
             },
             success: function(response) {
+                console.log('=== PAGINATION AJAX Response (REST) ===');
+                console.log('Success:', response.success);
+                console.log('HTML length:', response.data && response.data.html ? response.data.html.length : 0);
+                console.log('HTML preview:', response.data && response.data.html ? response.data.html.substring(0, 500) : 'N/A');
+                console.log('Target element exists:', $('#cver-reviews-ajax-area').length);
+                console.log('============================');
+                
                 if (response.success && response.data && response.data.html) {
                     // Remove loading overlay
                     $('.reviews-loading-overlay').remove();
                     // Update only the AJAX area (not the summary)
                     $('#cver-reviews-ajax-area').html(response.data.html);
+                    console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').html().length);
                     // Remove next/prev text from pagination
                     $('.woocommerce-pagination .prev').text('');
                     $('.woocommerce-pagination .next').text('');
@@ -80,11 +88,18 @@ jQuery(document).ready(function($) {
                         nonce: cver_ajax.nonce
                     },
                     success: function(response) {
+                        console.log('=== PAGINATION AJAX Response (Fallback admin-ajax) ===');
+                        console.log('Success:', response.success);
+                        console.log('HTML length:', response.data && response.data.html ? response.data.html.length : 0);
+                        console.log('Target element exists:', $('#cver-reviews-ajax-area').length);
+                        console.log('============================');
+                        
                         if (response.success && response.data) {
                             // Remove loading overlay
                             $('.reviews-loading-overlay').remove();
                             // Update only the AJAX area (not the summary)
                             $('#cver-reviews-ajax-area').html(response.data.html || response.data);
+                            console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').html().length);
                             // Remove next/prev text from pagination
                             $('.woocommerce-pagination .prev').text('');
                             $('.woocommerce-pagination .next').text('');
@@ -209,9 +224,17 @@ jQuery(document).ready(function($) {
             sort: sort,
             nonce: cver_ajax.nonce
         }, function(res){
+            console.log('=== FILTER AJAX Response ===');
+            console.log('Success:', res.success);
+            console.log('HTML length:', res.data && res.data.html ? res.data.html.length : 0);
+            console.log('HTML preview:', res.data && res.data.html ? res.data.html.substring(0, 500) : 'N/A');
+            console.log('Target element exists:', $('#cver-reviews-ajax-area').length);
+            console.log('============================');
+            
             $('.reviews-loading-overlay').remove();
             if (res.success && res.data && res.data.html) {
                 $('#cver-reviews-ajax-area').html(res.data.html);
+                console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').html().length);
                 // Restore selected text after AJAX
                 var restoredText = $('#cver-filter-selected').data('selected-text');
                 if (restoredText) {
@@ -248,9 +271,17 @@ jQuery(document).ready(function($) {
             sort: sort,
             nonce: cver_ajax.nonce
         }, function(res){
+            console.log('=== SORT AJAX Response ===');
+            console.log('Success:', res.success);
+            console.log('HTML length:', res.data && res.data.html ? res.data.html.length : 0);
+            console.log('HTML preview:', res.data && res.data.html ? res.data.html.substring(0, 500) : 'N/A');
+            console.log('Target element exists:', $('#cver-reviews-ajax-area').length);
+            console.log('============================');
+            
             $('.reviews-loading-overlay').remove();
             if (res.success && res.data && res.data.html) {
                 $('#cver-reviews-ajax-area').html(res.data.html);
+                console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').html().length);
                 // Restore selected text after AJAX
                 var restoredText = $('#cver-sort-selected').data('selected-text');
                 if (restoredText) {
