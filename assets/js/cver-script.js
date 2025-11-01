@@ -1,6 +1,47 @@
 // CV Enhanced Review - Handles AJAX for review, voting, filtering, sorting, etc.
 
 jQuery(document).ready(function($) {
+    // Helper function to clean AJAX response HTML - extract only reviews content
+    function cleanAjaxResponseHtml(html) {
+        if (!html) return '';
+        // Extract only <ol class="commentlist">...</ol> and pagination
+        var matches = html.match(/<ol[^>]*class="commentlist"[^>]*>[\s\S]*?<\/ol>/);
+        var olContent = matches ? matches[0] : '';
+        
+        // Extract pagination
+        var pagMatches = html.match(/<nav[^>]*class="woocommerce-pagination"[^>]*>[\s\S]*?<\/nav>/);
+        var pagContent = pagMatches ? pagMatches[0] : '';
+        
+        // Extract review form wrapper if exists (for mobile)
+        var formMatches = html.match(/<div[^>]*id="review_form_wrapper"[^>]*>[\s\S]*?<\/div>\s*<\/div>/);
+        var formContent = formMatches ? formMatches[0] : '';
+        
+        // Combine cleaned content
+        var cleaned = olContent + formContent + pagContent;
+        
+        // Fallback: if no match, remove all wrapper divs manually
+        if (!cleaned || cleaned.trim().length < 100) {
+            cleaned = html;
+            // Remove nested #cver-reviews-ajax-area
+            cleaned = cleaned.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '');
+            // Remove #reviews and #comments wrapper divs
+            cleaned = cleaned.replace(/<div[^>]*id="reviews"[^>]*>/gi, '');
+            cleaned = cleaned.replace(/<div[^>]*id="comments"[^>]*>/gi, '');
+            // Remove markers
+            cleaned = cleaned.replace(/<!-- CVER_CONTROLS_END -->/g, '');
+            cleaned = cleaned.replace(/<!-- CVER_HEADER_END -->/g, '');
+            // Remove controls wrapper
+            cleaned = cleaned.replace(/<div[^>]*class="cver-controls-wrapper"[^>]*>[\s\S]*?<\/div>\s*<\/div>/gi, '');
+            // Remove header
+            cleaned = cleaned.replace(/<h2[^>]*class="woocommerce-Reviews-title"[^>]*>[\s\S]*?<\/h2>/gi, '');
+            cleaned = cleaned.replace(/<div[^>]*class="cver-average-rating"[^>]*>[\s\S]*?<\/div>/gi, '');
+            // Clean trailing closing divs
+            cleaned = cleaned.replace(/<\/div>\s*<\/div>\s*(?=<ol|<nav)/g, '');
+        }
+        
+        return cleaned.trim();
+    }
+    
     // Handle pagination clicks (exact copy from legacy custom-functions.php)
     $(document).on('click', '.woocommerce-pagination a, .page-numbers a', function(e) {
         e.preventDefault();
@@ -118,8 +159,8 @@ jQuery(document).ready(function($) {
                             }
                             
                             var responseHtml = response.data.html || response.data;
-                            // Clean response HTML - remove any nested #cver-reviews-ajax-area
-                            var cleanHtml = responseHtml.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '').replace(/<\/div>\s*(?=<ol|<nav|<!--)/g, '');
+                            // Clean response HTML using helper function
+                            var cleanHtml = cleanAjaxResponseHtml(responseHtml);
                             
                             // Update only the AJAX area (not the summary)
                             $('#cver-reviews-ajax-area').first().html(cleanHtml);
@@ -272,8 +313,8 @@ jQuery(document).ready(function($) {
                     $('#cver-reviews-ajax-area').slice(1).remove();
                 }
                 
-                // Clean response HTML - remove any nested #cver-reviews-ajax-area
-                var cleanHtml = res.data.html.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '').replace(/<\/div>\s*(?=<ol|<nav|<!--)/g, '');
+                // Clean response HTML using helper function
+                var cleanHtml = cleanAjaxResponseHtml(res.data.html);
                 
                 $('#cver-reviews-ajax-area').first().html(cleanHtml);
                 console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').first().html().length);
@@ -330,8 +371,8 @@ jQuery(document).ready(function($) {
                     $('#cver-reviews-ajax-area').slice(1).remove();
                 }
                 
-                // Clean response HTML - remove any nested #cver-reviews-ajax-area
-                var cleanHtml = res.data.html.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '').replace(/<\/div>\s*(?=<ol|<nav|<!--)/g, '');
+                // Clean response HTML using helper function
+                var cleanHtml = cleanAjaxResponseHtml(res.data.html);
                 
                 $('#cver-reviews-ajax-area').first().html(cleanHtml);
                 console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').first().html().length);
