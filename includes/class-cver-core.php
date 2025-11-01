@@ -206,11 +206,9 @@ class CVER_Core {
         }
         
         // Render title and average rating only on first load (not during AJAX)
-        // Always open the wrapper divs, but only render header content on first load
-        echo '<div id="reviews" class="woocommerce-Reviews">';
-        echo '<div id="comments">';
-        
         if ($render_controls) {
+            echo '<div id="reviews" class="woocommerce-Reviews">';
+            echo '<div id="comments">';
             echo '<h2 class="woocommerce-Reviews-title">' . esc_html($total_comments) . ' reviews for <span>' . esc_html(get_the_title($product_id)) . '</span></h2>';
             
             // Average rating with WooCommerce star icons
@@ -246,7 +244,6 @@ class CVER_Core {
             }
         }
         echo '</ol>';
-        echo '</div>';
         if (!wp_is_mobile()) {
             echo '<div id="review_form_wrapper"><div id="review_form">';
             comment_form();
@@ -289,8 +286,11 @@ class CVER_Core {
             echo '</ul>';
             echo '</nav>';
         }
-        // Helpful voting area below (could also be next to each review later)
-        echo '</div>';
+        // Close wrapper divs only if we opened them (first load)
+        if ($render_controls) {
+            echo '</div>'; // Close #comments
+            echo '</div>'; // Close #reviews
+        }
         return ob_get_clean();
     }
 

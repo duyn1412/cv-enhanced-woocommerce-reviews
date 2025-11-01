@@ -2,7 +2,7 @@
 /*
 Plugin Name: CV Enhanced WooCommerce Reviews
 Description: Upgrade the WooCommerce product review system with an interactive average summary, advanced filtering/sorting, and helpful voting via AJAX. Responsive and performance-focused.
-Version: 1.1.2
+Version: 1.1.3
 Author: canadavapes dev
 Text Domain: cv-enhanced-review
 Domain Path: /languages
@@ -31,8 +31,8 @@ class CV_Enhanced_Review {
     // Enqueue CSS/JS for review features, only on WooCommerce product pages
     public function enqueue_assets() {
         if ( is_product() ) {
-            wp_enqueue_style( 'cver-style', plugins_url( 'assets/css/cver-style.css', __FILE__ ), array(), '1.1.2' );
-            wp_enqueue_script( 'cver-script', plugins_url( 'assets/js/cver-script.js', __FILE__ ), array('jquery'), '1.1.2', true );
+            wp_enqueue_style( 'cver-style', plugins_url( 'assets/css/cver-style.css', __FILE__ ), array(), '1.1.3' );
+            wp_enqueue_script( 'cver-script', plugins_url( 'assets/js/cver-script.js', __FILE__ ), array('jquery'), '1.1.3', true );
             wp_localize_script( 'cver-script', 'cver_ajax', array(
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'rest_url' => rest_url( 'cver/v1/reviews-pagination' ),
