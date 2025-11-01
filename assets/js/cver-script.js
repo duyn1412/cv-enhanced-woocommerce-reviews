@@ -49,9 +49,21 @@ jQuery(document).ready(function($) {
                 if (response.success && response.data && response.data.html) {
                     // Remove loading overlay
                     $('.reviews-loading-overlay').remove();
+                    
+                    // Check for duplicate IDs and remove them
+                    var existingCount = $('#cver-reviews-ajax-area').length;
+                    if (existingCount > 1) {
+                        console.warn('PAGINATION (REST): Duplicate #cver-reviews-ajax-area found! Removing duplicates...', existingCount);
+                        $('#cver-reviews-ajax-area').slice(1).remove();
+                    }
+                    
+                    // Clean response HTML - remove any nested #cver-reviews-ajax-area
+                    var cleanHtml = response.data.html.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '').replace(/<\/div>\s*(?=<ol|<nav|<!--)/g, '');
+                    
                     // Update only the AJAX area (not the summary)
-                    $('#cver-reviews-ajax-area').html(response.data.html);
-                    console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').html().length);
+                    $('#cver-reviews-ajax-area').first().html(cleanHtml);
+                    console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').first().html().length);
+                    console.log('Current #cver-reviews-ajax-area count:', $('#cver-reviews-ajax-area').length);
                     // Remove next/prev text from pagination
                     $('.woocommerce-pagination .prev').text('');
                     $('.woocommerce-pagination .next').text('');
@@ -97,9 +109,22 @@ jQuery(document).ready(function($) {
                         if (response.success && response.data) {
                             // Remove loading overlay
                             $('.reviews-loading-overlay').remove();
+                            
+                            // Check for duplicate IDs and remove them
+                            var existingCount = $('#cver-reviews-ajax-area').length;
+                            if (existingCount > 1) {
+                                console.warn('PAGINATION (Fallback): Duplicate #cver-reviews-ajax-area found! Removing duplicates...', existingCount);
+                                $('#cver-reviews-ajax-area').slice(1).remove();
+                            }
+                            
+                            var responseHtml = response.data.html || response.data;
+                            // Clean response HTML - remove any nested #cver-reviews-ajax-area
+                            var cleanHtml = responseHtml.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '').replace(/<\/div>\s*(?=<ol|<nav|<!--)/g, '');
+                            
                             // Update only the AJAX area (not the summary)
-                            $('#cver-reviews-ajax-area').html(response.data.html || response.data);
-                            console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').html().length);
+                            $('#cver-reviews-ajax-area').first().html(cleanHtml);
+                            console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').first().html().length);
+                            console.log('Current #cver-reviews-ajax-area count:', $('#cver-reviews-ajax-area').length);
                             // Remove next/prev text from pagination
                             $('.woocommerce-pagination .prev').text('');
                             $('.woocommerce-pagination .next').text('');
@@ -240,8 +265,19 @@ jQuery(document).ready(function($) {
             
             $('.reviews-loading-overlay').remove();
             if (res.success && res.data && res.data.html) {
-                $('#cver-reviews-ajax-area').html(res.data.html);
-                console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').html().length);
+                // Check for duplicate IDs and remove them
+                var existingCount = $('#cver-reviews-ajax-area').length;
+                if (existingCount > 1) {
+                    console.warn('FILTER: Duplicate #cver-reviews-ajax-area found! Removing duplicates...', existingCount);
+                    $('#cver-reviews-ajax-area').slice(1).remove();
+                }
+                
+                // Clean response HTML - remove any nested #cver-reviews-ajax-area
+                var cleanHtml = res.data.html.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '').replace(/<\/div>\s*(?=<ol|<nav|<!--)/g, '');
+                
+                $('#cver-reviews-ajax-area').first().html(cleanHtml);
+                console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').first().html().length);
+                console.log('Current #cver-reviews-ajax-area count:', $('#cver-reviews-ajax-area').length);
                 // Restore selected text after AJAX
                 var restoredText = $('#cver-filter-selected').data('selected-text');
                 if (restoredText) {
@@ -287,8 +323,19 @@ jQuery(document).ready(function($) {
             
             $('.reviews-loading-overlay').remove();
             if (res.success && res.data && res.data.html) {
-                $('#cver-reviews-ajax-area').html(res.data.html);
-                console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').html().length);
+                // Check for duplicate IDs and remove them
+                var existingCount = $('#cver-reviews-ajax-area').length;
+                if (existingCount > 1) {
+                    console.warn('SORT: Duplicate #cver-reviews-ajax-area found! Removing duplicates...', existingCount);
+                    $('#cver-reviews-ajax-area').slice(1).remove();
+                }
+                
+                // Clean response HTML - remove any nested #cver-reviews-ajax-area
+                var cleanHtml = res.data.html.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '').replace(/<\/div>\s*(?=<ol|<nav|<!--)/g, '');
+                
+                $('#cver-reviews-ajax-area').first().html(cleanHtml);
+                console.log('Content replaced. New content length:', $('#cver-reviews-ajax-area').first().html().length);
+                console.log('Current #cver-reviews-ajax-area count:', $('#cver-reviews-ajax-area').length);
                 // Restore selected text after AJAX
                 var restoredText = $('#cver-sort-selected').data('selected-text');
                 if (restoredText) {
