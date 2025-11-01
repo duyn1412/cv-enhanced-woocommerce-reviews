@@ -173,7 +173,7 @@ class CVER_Core {
                 echo '<div class="star-rating" role="img" aria-label="Rated '.esc_attr($stats['average']).' out of 5">';
                 echo '<span style="width:'.( ($stats['average'] / 5) * 100 ).'%">Rated <strong class="rating">'.esc_html($stats['average']).'</strong> out of 5</span>';
                 echo '</div>';
-                echo '<span class="cver-average-number">'.number_format($stats['average'], 1).'</span>';
+                echo '<span class="cver-average-number">'.number_format($stats['average'], 1).' average rating</span>';
                 echo '</div>';
             }
             echo '<!-- CVER_HEADER_END -->';
@@ -193,7 +193,7 @@ class CVER_Core {
             // Filter & Sort UI
             echo '<div class="cver-controls-wrapper">';
             echo '<div class="cver-filter-wrapper">';
-            echo '<div class="cver-filter-dropdown-custom">';
+            echo '<svg viewBox="0 0 330 512" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"><path d="M305.913 197.085c0 2.266-1.133 4.815-2.833 6.514L171.087 335.593c-1.7 1.7-4.249 2.832-6.515 2.832s-4.815-1.133-6.515-2.832L26.064 203.599c-1.7-1.7-2.832-4.248-2.832-6.514s1.132-4.816 2.832-6.515l14.162-14.163c1.7-1.699 3.966-2.832 6.515-2.832 2.266 0 4.815 1.133 6.515 2.832l111.316 111.317 111.316-111.317c1.7-1.699 4.249-2.832 6.515-2.832s4.815 1.133 6.515 2.832l14.162 14.163c1.7 1.7 2.833 4.249 2.833 6.515z"></path></svg><div class="cver-filter-dropdown-custom">';
             $selected_text = $star ? 'Filter: '.$star.' Star'.($star>1?'s':'') : 'Filter by rating';
             echo '<div class="cver-filter-selected" id="cver-filter-selected" data-selected-text="'.esc_attr($selected_text).'">'.$selected_text.'</div>';
             echo '<div class="cver-filter-options" id="cver-filter-options">';
@@ -219,7 +219,7 @@ class CVER_Core {
                 'helpful' => 'Most Helpful'
             ];
             $selected_sort_text = 'Sort by: '.($sort_labels[$sort] ?? 'Newest');
-            echo '<div class="cver-sort-selected" id="cver-sort-selected" data-selected-text="'.esc_attr($selected_sort_text).'">'.$selected_sort_text.'</div>';
+            echo '<div class="cver-sort-selected" id="cver-sort-selected" data-selected-text="'.esc_attr($selected_sort_text).'">'.$selected_sort_text.'<svg viewBox="0 0 330 512" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"><path d="M305.913 197.085c0 2.266-1.133 4.815-2.833 6.514L171.087 335.593c-1.7 1.7-4.249 2.832-6.515 2.832s-4.815-1.133-6.515-2.832L26.064 203.599c-1.7-1.7-2.832-4.248-2.832-6.514s1.132-4.816 2.832-6.515l14.162-14.163c1.7-1.699 3.966-2.832 6.515-2.832 2.266 0 4.815 1.133 6.515 2.832l111.316 111.317 111.316-111.317c1.7-1.699 4.249-2.832 6.515-2.832s4.815 1.133 6.515 2.832l14.162 14.163c1.7 1.7 2.833 4.249 2.833 6.515z"></path></svg></div>';
             echo '<div class="cver-sort-options" id="cver-sort-options">';
             foreach($sort_labels as $value => $label) {
                 $active = ($sort == $value) ? ' active' : '';
@@ -311,6 +311,7 @@ class CVER_Core {
             'product_id' => $product_id,
             'per_page' => $per_page,
             'page' => $page,
+            'skip_controls' => true
         ]);
         wp_send_json_success(['html' => $html, 'page' => $page]);
     }
@@ -321,6 +322,7 @@ class CVER_Core {
             'product_id' => $request->get_param('product_id'),
             'page' => $request->get_param('page'),
             'per_page' => $request->get_param('per_page'),
+            'skip_controls' => true
         ];
         $html = $this->get_reviews_with_pagination($args);
         return rest_ensure_response([

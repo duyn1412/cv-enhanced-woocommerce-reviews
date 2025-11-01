@@ -30,9 +30,11 @@ class CV_Enhanced_Review {
     }
     // Enqueue CSS/JS for review features, only on WooCommerce product pages
     public function enqueue_assets() {
+        $css_version = filemtime( plugin_dir_path( __FILE__ ) . 'assets/css/cver-style.css' );
+        $js_version = filemtime( plugin_dir_path( __FILE__ ) . 'assets/js/cver-script.js' );
         if ( is_product() ) {
-            wp_enqueue_style( 'cver-style', plugins_url( 'assets/css/cver-style.css', __FILE__ ), array(), '1.1.8' );
-            wp_enqueue_script( 'cver-script', plugins_url( 'assets/js/cver-script.js', __FILE__ ), array('jquery'), '1.1.8', true );
+            wp_enqueue_style( 'cver-style', plugins_url( 'assets/css/cver-style.css', __FILE__ ), array(), $css_version );
+            wp_enqueue_script( 'cver-script', plugins_url( 'assets/js/cver-script.js', __FILE__ ), array('jquery'), $js_version, true );
             wp_localize_script( 'cver-script', 'cver_ajax', array(
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'rest_url' => rest_url( 'cver/v1/reviews-pagination' ),

@@ -22,21 +22,24 @@ jQuery(document).ready(function($) {
         // Fallback: if no match, remove all wrapper divs manually
         if (!cleaned || cleaned.trim().length < 100) {
             cleaned = html;
-            // Remove nested #cver-reviews-ajax-area
-            cleaned = cleaned.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '');
-            // Remove #reviews and #comments wrapper divs
-            cleaned = cleaned.replace(/<div[^>]*id="reviews"[^>]*>/gi, '');
-            cleaned = cleaned.replace(/<div[^>]*id="comments"[^>]*>/gi, '');
+            // Remove nested #cver-reviews-ajax-area (opening tag)
+            cleaned = cleaned.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>[\s]*/gi, '');
+            // Remove #reviews wrapper div (opening tag)
+            cleaned = cleaned.replace(/<div[^>]*id="reviews"[^>]*class="woocommerce-Reviews"[^>]*>[\s]*/gi, '');
+            // Remove #comments wrapper div (opening tag)
+            cleaned = cleaned.replace(/<div[^>]*id="comments"[^>]*>[\s]*/gi, '');
             // Remove markers
-            cleaned = cleaned.replace(/<!-- CVER_CONTROLS_END -->/g, '');
-            cleaned = cleaned.replace(/<!-- CVER_HEADER_END -->/g, '');
-            // Remove controls wrapper
+            cleaned = cleaned.replace(/<!--\s*CVER_CONTROLS_END\s*-->/g, '');
+            cleaned = cleaned.replace(/<!--\s*CVER_HEADER_END\s*-->/g, '');
+            // Remove controls wrapper (entire block)
             cleaned = cleaned.replace(/<div[^>]*class="cver-controls-wrapper"[^>]*>[\s\S]*?<\/div>\s*<\/div>/gi, '');
-            // Remove header
+            // Remove header elements
             cleaned = cleaned.replace(/<h2[^>]*class="woocommerce-Reviews-title"[^>]*>[\s\S]*?<\/h2>/gi, '');
             cleaned = cleaned.replace(/<div[^>]*class="cver-average-rating"[^>]*>[\s\S]*?<\/div>/gi, '');
-            // Clean trailing closing divs
-            cleaned = cleaned.replace(/<\/div>\s*<\/div>\s*(?=<ol|<nav)/g, '');
+            // Remove trailing closing divs that close #comments and #reviews (but keep content)
+            cleaned = cleaned.replace(/<\/div>\s*<\/div>\s*(?=<ol|<nav|$)/g, '');
+            // Remove any remaining empty wrapper divs
+            cleaned = cleaned.replace(/<\/div>\s*(?=<ol|<nav|$)/g, '');
         }
         
         return cleaned.trim();
@@ -98,8 +101,8 @@ jQuery(document).ready(function($) {
                         $('#cver-reviews-ajax-area').slice(1).remove();
                     }
                     
-                    // Clean response HTML - remove any nested #cver-reviews-ajax-area
-                    var cleanHtml = response.data.html.replace(/<div[^>]*id="cver-reviews-ajax-area"[^>]*>/gi, '').replace(/<\/div>\s*(?=<ol|<nav|<!--)/g, '');
+                    // Clean response HTML using helper function
+                    var cleanHtml = cleanAjaxResponseHtml(response.data.html);
                     
                     // Update only the AJAX area (not the summary)
                     $('#cver-reviews-ajax-area').first().html(cleanHtml);
