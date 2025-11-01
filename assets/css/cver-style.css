@@ -13,7 +13,6 @@
 .commentlist{position:relative;}
 /* Filter & Sort controls at top */
 .cver-controls-wrapper{display:flex;gap:20px;margin:15px 0;flex-wrap:wrap;}
-.cver-filter-wrapper, .cver-sorting-wrapper{display:flex;align-items:center;gap:8px;}
 /* Custom filter dropdown */
 .cver-filter-dropdown-custom{position:relative;min-width:280px;}
 .cver-filter-selected{padding:8px 12px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer;position:relative;padding-right:30px;}
@@ -46,4 +45,4 @@
 .cver-helpful-btn:disabled{opacity:0.6;cursor:not-allowed;}
 .cver-helpful-btn .cver-icon-up, .cver-helpful-btn .cver-icon-down{font-size:16px;line-height:1;}
 .cver-helpful-btn .cver-count{font-weight:600;min-width:16px;text-align:center;}
-@media(max-width:600px){.cver-controls-wrapper{flex-direction:column;gap:10px;} .cver-filter-wrapper,.cver-sorting-wrapper{width:100%;}}
+@media(max-width:600px){.cver-controls-wrapper{flex-direction:column;gap:10px;} .cver-filter-dropdown-custom,.cver-sort-dropdown-custom{width:100%;min-width:auto;}}

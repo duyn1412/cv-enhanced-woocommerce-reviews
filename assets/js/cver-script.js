@@ -185,7 +185,8 @@ jQuery(document).ready(function($) {
     // Filter option selection
     $(document).on('click', '.cver-filter-option', function(){
         var star = $(this).data('value');
-        var selectedText = $(this).find('.cver-filter-stars').text().trim() || 'All Stars';
+        var starText = $(this).find('.cver-filter-stars').text().trim() || 'All Stars';
+        var selectedText = star ? 'Filter: ' + starText : 'Filter by rating';
         $('#cver-filter-selected').text(selectedText);
         $('#cver-filter-dropdown').val(star);
         $('.cver-filter-dropdown-custom').removeClass('open');
@@ -223,7 +224,8 @@ jQuery(document).ready(function($) {
     // Sort option selection
     $(document).on('click', '.cver-sort-option', function(){
         var sort = $(this).data('value');
-        var selectedText = $(this).text().trim();
+        var sortText = $(this).text().trim();
+        var selectedText = 'Sort by: ' + sortText;
         $('#cver-sort-selected').text(selectedText);
         $('#cver-sort-dropdown').val(sort);
         $('.cver-sort-dropdown-custom').removeClass('open');

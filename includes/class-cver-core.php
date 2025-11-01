@@ -166,9 +166,8 @@ class CVER_Core {
             // Filter & Sort UI at the top (outside AJAX reload area)
             echo '<div class="cver-controls-wrapper">';
             echo '<div class="cver-filter-wrapper">';
-            echo '<label for="cver-filter-dropdown">Filter by rating: </label>';
             echo '<div class="cver-filter-dropdown-custom">';
-            $selected_text = $star ? $star.' Star'.($star>1?'s':'') : 'All Stars';
+            $selected_text = $star ? 'Filter: '.$star.' Star'.($star>1?'s':'') : 'Filter by rating';
             echo '<div class="cver-filter-selected" id="cver-filter-selected" data-selected-text="'.esc_attr($selected_text).'">'.$selected_text.'</div>';
             echo '<div class="cver-filter-options" id="cver-filter-options">';
             echo '<div class="cver-filter-option'.($star==''?' active':'').'" data-value="">All Stars</div>';
@@ -185,7 +184,6 @@ class CVER_Core {
             echo '<input type="hidden" id="cver-filter-dropdown" value="'.esc_attr($star).'">';
             echo '</div>';
             echo '<div class="cver-sorting-wrapper">';
-            echo '<label for="cver-sort-dropdown">Sort by: </label>';
             echo '<div class="cver-sort-dropdown-custom">';
             $sort_labels = [
                 'newest' => 'Newest',
@@ -193,7 +191,7 @@ class CVER_Core {
                 'lowest' => 'Lowest Rating',
                 'helpful' => 'Most Helpful'
             ];
-            $selected_sort_text = $sort_labels[$sort] ?? 'Newest';
+            $selected_sort_text = 'Sort by: '.($sort_labels[$sort] ?? 'Newest');
             echo '<div class="cver-sort-selected" id="cver-sort-selected" data-selected-text="'.esc_attr($selected_sort_text).'">'.$selected_sort_text.'</div>';
             echo '<div class="cver-sort-options" id="cver-sort-options">';
             foreach($sort_labels as $value => $label) {
