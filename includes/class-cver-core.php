@@ -202,6 +202,7 @@ class CVER_Core {
             echo '<input type="hidden" id="cver-sort-dropdown" value="'.esc_attr($sort).'">';
             echo '</div>';
             echo '</div>';
+            echo '<!-- CVER_CONTROLS_END -->';
         }
         
         echo '<div id="reviews" class="woocommerce-Reviews">';
@@ -324,14 +325,16 @@ class CVER_Core {
             'per_page' => 4,
             'page' => 1,
         ]);
-        // Split controls and reviews
-        if (preg_match('/(.*?<div class="cver-controls-wrapper">.*?<\/div>)(.*)/s', $initial_html, $matches)) {
-            echo $matches[1]; // Controls outside AJAX area
+        // Split controls and reviews using HTML comment marker
+        if (strpos($initial_html, '<!-- CVER_CONTROLS_END -->') !== false) {
+            $parts = explode('<!-- CVER_CONTROLS_END -->', $initial_html, 2);
+            echo $parts[0]; // Controls outside AJAX area
+            echo '<!-- CVER_CONTROLS_END -->';
             echo '<div id="cver-reviews-ajax-area">';
-            echo $matches[2]; // Reviews inside AJAX area
+            echo $parts[1]; // Reviews inside AJAX area
             echo '</div>';
         } else {
-            // Fallback if pattern not found
+            // Fallback if marker not found (when skip_controls is true)
             echo '<div id="cver-reviews-ajax-area">';
             echo $initial_html;
             echo '</div>';
