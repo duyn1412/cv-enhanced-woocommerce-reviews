@@ -42,8 +42,8 @@ jQuery(document).ready(function($) {
                 if (response.success && response.data && response.data.html) {
                     // Remove loading overlay
                     $('.reviews-loading-overlay').remove();
-                    // Update content
-                    $('#cver-reviews-wrap').html(response.data.html);
+                    // Update only the AJAX area (not the summary)
+                    $('#cver-reviews-ajax-area').html(response.data.html);
                     // Remove next/prev text from pagination
                     $('.woocommerce-pagination .prev').text('');
                     $('.woocommerce-pagination .next').text('');
@@ -83,8 +83,8 @@ jQuery(document).ready(function($) {
                         if (response.success && response.data) {
                             // Remove loading overlay
                             $('.reviews-loading-overlay').remove();
-                            // Update content
-                            $('#cver-reviews-wrap').html(response.data.html || response.data);
+                            // Update only the AJAX area (not the summary)
+                            $('#cver-reviews-ajax-area').html(response.data.html || response.data);
                             // Remove next/prev text from pagination
                             $('.woocommerce-pagination .prev').text('');
                             $('.woocommerce-pagination .next').text('');
@@ -133,7 +133,7 @@ jQuery(document).ready(function($) {
         }, function(res){
             $('.reviews-loading-overlay').remove();
             if (res.success && res.data && res.data.html) {
-                $('#cver-reviews-wrap').html(res.data.html);
+                $('#cver-reviews-ajax-area').html(res.data.html);
                 $('.cver-clear-filter-area').show();
             }
         });
@@ -152,15 +152,50 @@ jQuery(document).ready(function($) {
         }, function(res){
             $('.reviews-loading-overlay').remove();
             if (res.success && res.data && res.data.html) {
-                $('#cver-reviews-wrap').html(res.data.html);
+                $('#cver-reviews-ajax-area').html(res.data.html);
                 $('.cver-clear-filter-area').hide();
             }
         });
     });
 
-    // Filter dropdown (by star rating)
-    $(document).on('change', '#cver-filter-dropdown', function(){
-        var star = $(this).val();
+    // Custom filter dropdown toggle
+    $(document).on('click', '#cver-filter-selected', function(e){
+        e.stopPropagation();
+        $('.cver-filter-dropdown-custom').toggleClass('open');
+        $('.cver-sort-dropdown-custom').removeClass('open');
+    });
+    
+    // Custom sort dropdown toggle
+    $(document).on('click', '#cver-sort-selected', function(e){
+        e.stopPropagation();
+        $('.cver-sort-dropdown-custom').toggleClass('open');
+        $('.cver-filter-dropdown-custom').removeClass('open');
+    });
+    
+    // Close dropdowns when clicking outside
+    $(document).on('click', function(e){
+        if(!$(e.target).closest('.cver-filter-dropdown-custom').length){
+            $('.cver-filter-dropdown-custom').removeClass('open');
+        }
+        if(!$(e.target).closest('.cver-sort-dropdown-custom').length){
+            $('.cver-sort-dropdown-custom').removeClass('open');
+        }
+    });
+    
+    // Filter option selection
+    $(document).on('click', '.cver-filter-option', function(){
+        var star = $(this).data('value');
+        var selectedText = $(this).find('.cver-filter-stars').text().trim() || 'All Stars';
+        $('#cver-filter-selected').text(selectedText);
+        $('#cver-filter-dropdown').val(star);
+        $('.cver-filter-dropdown-custom').removeClass('open');
+        $('.cver-filter-option').removeClass('active');
+        $(this).addClass('active');
+        
+        // Store selected text for after AJAX
+        $('#cver-filter-selected').data('selected-text', selectedText);
+        
+        // Trigger AJAX reload
         var sort = $('#cver-sort-dropdown').val() || 'newest';
         var productId = $('#cver-reviews-wrap').data('product-id') || $('[name="add-to-cart"]').val();
         $('.commentlist').append('<div class="reviews-loading-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 999; display: flex; align-items: center; justify-content: center;"><div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0073aa; border-radius: 50%; animation: spin 1s linear infinite;"></div></div>');
@@ -175,14 +210,30 @@ jQuery(document).ready(function($) {
         }, function(res){
             $('.reviews-loading-overlay').remove();
             if (res.success && res.data && res.data.html) {
-                $('#cver-reviews-wrap').html(res.data.html);
+                $('#cver-reviews-ajax-area').html(res.data.html);
+                // Restore selected text after AJAX
+                var restoredText = $('#cver-filter-selected').data('selected-text');
+                if (restoredText) {
+                    $('#cver-filter-selected').text(restoredText);
+                }
             }
         });
     });
 
-    // Sorting dropdown
-    $(document).on('change', '#cver-sort-dropdown', function(){
-        var sort = $(this).val();
+    // Sort option selection
+    $(document).on('click', '.cver-sort-option', function(){
+        var sort = $(this).data('value');
+        var selectedText = $(this).text().trim();
+        $('#cver-sort-selected').text(selectedText);
+        $('#cver-sort-dropdown').val(sort);
+        $('.cver-sort-dropdown-custom').removeClass('open');
+        $('.cver-sort-option').removeClass('active');
+        $(this).addClass('active');
+        
+        // Store selected text for after AJAX
+        $('#cver-sort-selected').data('selected-text', selectedText);
+        
+        // Trigger AJAX reload
         var star = $('#cver-filter-dropdown').val() || '';
         var productId = $('#cver-reviews-wrap').data('product-id') || $('[name="add-to-cart"]').val();
         $('.commentlist').append('<div class="reviews-loading-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 999; display: flex; align-items: center; justify-content: center;"><div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0073aa; border-radius: 50%; animation: spin 1s linear infinite;"></div></div>');
@@ -197,7 +248,12 @@ jQuery(document).ready(function($) {
         }, function(res){
             $('.reviews-loading-overlay').remove();
             if (res.success && res.data && res.data.html) {
-                $('#cver-reviews-wrap').html(res.data.html);
+                $('#cver-reviews-ajax-area').html(res.data.html);
+                // Restore selected text after AJAX
+                var restoredText = $('#cver-sort-selected').data('selected-text');
+                if (restoredText) {
+                    $('#cver-sort-selected').text(restoredText);
+                }
             }
         });
     });

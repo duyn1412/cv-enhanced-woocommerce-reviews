@@ -150,28 +150,65 @@ class CVER_Core {
         $total_pages = ceil($total_comments/$comments_per_page);
         $comments = get_comments($query);
         ob_start();
+        // Only render controls on first load (not AJAX)
+        $render_controls = !isset($args['skip_controls']) || !$args['skip_controls'];
+        
+        if ($render_controls) {
+            // Calculate star distribution for filter UI
+            $all_reviews = get_comments(['post_id'=>$product_id,'status'=>'approve','type'=>'review','number'=>0]);
+            $star_counts = [1=>0,2=>0,3=>0,4=>0,5=>0];
+            foreach($all_reviews as $rev) {
+                $r = intval(get_comment_meta($rev->comment_ID,'rating',true));
+                if($r>=1 && $r<=5) $star_counts[$r]++;
+            }
+            $total_reviews = count($all_reviews);
+            
+            // Filter & Sort UI at the top (outside AJAX reload area)
+            echo '<div class="cver-controls-wrapper">';
+            echo '<div class="cver-filter-wrapper">';
+            echo '<label for="cver-filter-dropdown">Filter by rating: </label>';
+            echo '<div class="cver-filter-dropdown-custom">';
+            $selected_text = $star ? $star.' Star'.($star>1?'s':'') : 'All Stars';
+            echo '<div class="cver-filter-selected" id="cver-filter-selected" data-selected-text="'.esc_attr($selected_text).'">'.$selected_text.'</div>';
+            echo '<div class="cver-filter-options" id="cver-filter-options">';
+            echo '<div class="cver-filter-option'.($star==''?' active':'').'" data-value="">All Stars</div>';
+            for($s=5;$s>=1;$s--){
+                $count = $star_counts[$s];
+                $percent = $total_reviews ? round(($count/$total_reviews)*100) : 0;
+                echo '<div class="cver-filter-option'.($star==$s?' active':'').'" data-value="'.$s.'">';
+                echo '<span class="cver-filter-percent">'.$percent.'%</span>';
+                echo '<span class="cver-filter-bar"><span class="cver-filter-bar-fill" style="width:'.$percent.'%"></span></span>';
+                echo '<span class="cver-filter-stars">'.$s.' Star'.($s>1?'s':'').'</span>';
+                echo '</div>';
+            }
+            echo '</div></div>';
+            echo '<input type="hidden" id="cver-filter-dropdown" value="'.esc_attr($star).'">';
+            echo '</div>';
+            echo '<div class="cver-sorting-wrapper">';
+            echo '<label for="cver-sort-dropdown">Sort by: </label>';
+            echo '<div class="cver-sort-dropdown-custom">';
+            $sort_labels = [
+                'newest' => 'Newest',
+                'highest' => 'Highest Rating',
+                'lowest' => 'Lowest Rating',
+                'helpful' => 'Most Helpful'
+            ];
+            $selected_sort_text = $sort_labels[$sort] ?? 'Newest';
+            echo '<div class="cver-sort-selected" id="cver-sort-selected" data-selected-text="'.esc_attr($selected_sort_text).'">'.$selected_sort_text.'</div>';
+            echo '<div class="cver-sort-options" id="cver-sort-options">';
+            foreach($sort_labels as $value => $label) {
+                $active = ($sort == $value) ? ' active' : '';
+                echo '<div class="cver-sort-option'.$active.'" data-value="'.$value.'">'.$label.'</div>';
+            }
+            echo '</div></div>';
+            echo '<input type="hidden" id="cver-sort-dropdown" value="'.esc_attr($sort).'">';
+            echo '</div>';
+            echo '</div>';
+        }
+        
         echo '<div id="reviews" class="woocommerce-Reviews">';
         echo '<div id="comments">';
         echo '<h2 class="woocommerce-Reviews-title">' . esc_html($total_comments) . ' reviews for <span>' . esc_html(get_the_title($product_id)) . '</span></h2>';
-        
-        // Filter & Sort UI at the top
-        echo '<div class="cver-controls-wrapper">';
-        echo '<div class="cver-filter-wrapper"><label for="cver-filter-dropdown">Filter by rating: </label><select id="cver-filter-dropdown">';
-        echo '<option value="">All Stars</option>';
-        echo '<option value="5"'.($star=='5'?' selected':'').'>5 Stars</option>';
-        echo '<option value="4"'.($star=='4'?' selected':'').'>4 Stars</option>';
-        echo '<option value="3"'.($star=='3'?' selected':'').'>3 Stars</option>';
-        echo '<option value="2"'.($star=='2'?' selected':'').'>2 Stars</option>';
-        echo '<option value="1"'.($star=='1'?' selected':'').'>1 Star</option>';
-        echo '</select></div>';
-        echo '<div class="cver-sorting-wrapper"><label for="cver-sort-dropdown">Sort by: </label><select id="cver-sort-dropdown">';
-        echo '<option value="newest"'.($sort=='newest'?' selected':'').'>Newest</option>';
-        echo '<option value="highest"'.($sort=='highest'?' selected':'').'>Highest Rating</option>';
-        echo '<option value="lowest"'.($sort=='lowest'?' selected':'').'>Lowest Rating</option>';
-        echo '<option value="helpful"'.($sort=='helpful'?' selected':'').'>Most Helpful</option>';
-        echo '</select></div>';
-        echo '</div>';
-        
         echo '<ol class="commentlist">';
         global $comment, $comment_depth, $comment_parent;
         $comment_depth = 1;
@@ -281,19 +318,31 @@ class CVER_Core {
         $product_id = get_the_ID();
         ob_start();
         echo '<div id="cver-reviews-wrap" data-product-id="'.esc_attr($product_id).'">';
+        // Summary stays outside AJAX reload area
         do_action('cver_render_summary', $product_id);
-        do_action('cver_render_distribution', $product_id);
-        // Render reviews below the chart
-        echo $this->get_reviews_with_pagination([
+        // Get initial reviews with controls
+        $initial_html = $this->get_reviews_with_pagination([
             'product_id' => $product_id,
             'per_page' => 4,
             'page' => 1,
         ]);
+        // Split controls and reviews
+        if (preg_match('/(.*?<div class="cver-controls-wrapper">.*?<\/div>)(.*)/s', $initial_html, $matches)) {
+            echo $matches[1]; // Controls outside AJAX area
+            echo '<div id="cver-reviews-ajax-area">';
+            echo $matches[2]; // Reviews inside AJAX area
+            echo '</div>';
+        } else {
+            // Fallback if pattern not found
+            echo '<div id="cver-reviews-ajax-area">';
+            echo $initial_html;
+            echo '</div>';
+        }
         echo '</div>';
         return ob_get_clean();
     }
     
-    // --- skeletons for sort/filter/voting (AJAX pipeline to be implemented next) ---
+    // --- AJAX handlers ---
     public function handle_filter_reviews() {
         $product_id = intval($_POST['product_id'] ?? 0);
         $page = intval($_POST['page'] ?? 1);
@@ -301,7 +350,7 @@ class CVER_Core {
         $star = $_POST['star'] ?? null;
         $sort = $_POST['sort'] ?? 'newest';
         $html = $this->get_reviews_with_pagination([
-            'product_id'=>$product_id,'per_page'=>$per_page,'page'=>$page,'star'=>$star,'sort'=>$sort
+            'product_id'=>$product_id,'per_page'=>$per_page,'page'=>$page,'star'=>$star,'sort'=>$sort,'skip_controls'=>true
         ]);
         wp_send_json_success(['html'=>$html,'page'=>$page]);
     }
