@@ -206,9 +206,11 @@ class CVER_Core {
         }
         
         // Render title and average rating only on first load (not during AJAX)
+        // Always open the wrapper divs, but only render header content on first load
+        echo '<div id="reviews" class="woocommerce-Reviews">';
+        echo '<div id="comments">';
+        
         if ($render_controls) {
-            echo '<div id="reviews" class="woocommerce-Reviews">';
-            echo '<div id="comments">';
             echo '<h2 class="woocommerce-Reviews-title">' . esc_html($total_comments) . ' reviews for <span>' . esc_html(get_the_title($product_id)) . '</span></h2>';
             
             // Average rating with WooCommerce star icons
