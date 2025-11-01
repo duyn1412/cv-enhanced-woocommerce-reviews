@@ -205,9 +205,25 @@ class CVER_Core {
             echo '<!-- CVER_CONTROLS_END -->';
         }
         
-        echo '<div id="reviews" class="woocommerce-Reviews">';
-        echo '<div id="comments">';
-        echo '<h2 class="woocommerce-Reviews-title">' . esc_html($total_comments) . ' reviews for <span>' . esc_html(get_the_title($product_id)) . '</span></h2>';
+        // Render title and average rating only on first load (not during AJAX)
+        if ($render_controls) {
+            echo '<div id="reviews" class="woocommerce-Reviews">';
+            echo '<div id="comments">';
+            echo '<h2 class="woocommerce-Reviews-title">' . esc_html($total_comments) . ' reviews for <span>' . esc_html(get_the_title($product_id)) . '</span></h2>';
+            
+            // Average rating with WooCommerce star icons
+            $stats = $this->get_review_stats($product_id);
+            if ($stats['total'] > 0) {
+                echo '<div class="cver-average-rating">';
+                echo '<div class="star-rating" role="img" aria-label="Rated '.esc_attr($stats['average']).' out of 5">';
+                echo '<span style="width:'.( ($stats['average'] / 5) * 100 ).'%">Rated <strong class="rating">'.esc_html($stats['average']).'</strong> out of 5</span>';
+                echo '</div>';
+                echo '<span class="cver-average-number">'.number_format($stats['average'], 1).'</span>';
+                echo '</div>';
+            }
+            echo '<!-- CVER_HEADER_END -->';
+        }
+        
         echo '<ol class="commentlist">';
         global $comment, $comment_depth, $comment_parent;
         $comment_depth = 1;
@@ -317,24 +333,30 @@ class CVER_Core {
         $product_id = get_the_ID();
         ob_start();
         echo '<div id="cver-reviews-wrap" data-product-id="'.esc_attr($product_id).'">';
-        // Summary stays outside AJAX reload area
-        do_action('cver_render_summary', $product_id);
-        // Get initial reviews with controls
+        // Get initial reviews with controls (average rating now inside reviews area)
         $initial_html = $this->get_reviews_with_pagination([
             'product_id' => $product_id,
             'per_page' => 4,
             'page' => 1,
         ]);
-        // Split controls and reviews using HTML comment marker
-        if (strpos($initial_html, '<!-- CVER_CONTROLS_END -->') !== false) {
-            $parts = explode('<!-- CVER_CONTROLS_END -->', $initial_html, 2);
-            echo $parts[0]; // Controls outside AJAX area
+        // Split header, controls and reviews using HTML comment markers
+        // Structure: Header (title + avg rating) → Controls (filter/sort) → Reviews (AJAX area)
+        if (strpos($initial_html, '<!-- CVER_HEADER_END -->') !== false && strpos($initial_html, '<!-- CVER_CONTROLS_END -->') !== false) {
+            // Split by header marker first
+            $header_parts = explode('<!-- CVER_HEADER_END -->', $initial_html, 2);
+            echo $header_parts[0]; // Header (title + avg rating) outside AJAX
+            echo '<!-- CVER_HEADER_END -->';
+            
+            // Split remaining by controls marker
+            $controls_parts = explode('<!-- CVER_CONTROLS_END -->', $header_parts[1], 2);
+            echo $controls_parts[0]; // Controls outside AJAX area
             echo '<!-- CVER_CONTROLS_END -->';
+            
             echo '<div id="cver-reviews-ajax-area">';
-            echo $parts[1]; // Reviews inside AJAX area
+            echo $controls_parts[1]; // Reviews inside AJAX area
             echo '</div>';
         } else {
-            // Fallback if marker not found (when skip_controls is true)
+            // Fallback for AJAX calls (when skip_controls is true)
             echo '<div id="cver-reviews-ajax-area">';
             echo $initial_html;
             echo '</div>';
